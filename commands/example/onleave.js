@@ -61,7 +61,8 @@ exports.modal = async (client, interaction) => {
 
         // for the server with the id of key
         let guild = await client.guilds.cache.get(key.split("|")[0])
-        let guildMember = await guild.members.fetch(interaction.user.id)
+        let guildMember = await guild.members.fetch(interaction.user.id).catch(() => null)
+        if (!guildMember) continue
 
         let goingOnLeave = interaction.customId === "onleave/onleave";
 
