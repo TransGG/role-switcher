@@ -4,7 +4,9 @@ const {
     ModalBuilder,
     ActionRowBuilder,
     TextInputBuilder,
-    TextInputStyle
+    MessageFlags,
+    ContainerBuilder,
+    TextDisplayBuilder,
 } = require('discord.js')
 
 exports.slash = async (client, interaction) => {
@@ -14,31 +16,35 @@ exports.slash = async (client, interaction) => {
     // remove any servers that are not interaction.guild.id
     switchArray = switchArray.filter(value => value[0].split("|")[0] == interaction.guild.id)
 
-    switchArray = switchArray.map((value) => {
-        return {
-            name: `Applies to Both Servers`,
-            value: `Roles:\n${value[1].map((value) => `<@&${value[0]}> <-> <@&${value[1]}>`).join("\n")}`
-        }
-    })
-
     interaction.reply({
-        embeds: [
-            new EmbedBuilder()
-            .setTitle('Switch On Leave Status')
-            .setDescription('Click the button below to go on leave, or to come back from leave.\n\n**Note:** Feel free to leave the reason/time blank if you\'re coming back from leave.')
-            .addFields(switchArray)
-        ],
+        flags: MessageFlags.IsComponentsV2,
         components: [
-            new ActionRowBuilder().addComponents(new ButtonBuilder()
+            new ContainerBuilder()
+            .addTextDisplayComponents(
+                new TextDisplayBuilder()
+                .setContent(`
+## Switch On-Leave Status
+
+Click the button below to go on leave, or to come back from leave.
+
+**Note:** Feel free to leave the reason/time blank if you're coming back from leave.
+
+**Applies to All Servers:**
+${switchArray.map((value) => value[1].map((value) => `<@&${value[0]}> <-> <@&${value[1]}>`).join("\n")).join("\n")}
+                `.trim())
+            ),
+            new ActionRowBuilder()
+            .addComponents(
+                new ButtonBuilder()
                 .setLabel("Go On Leave")
                 .setCustomId("onleave/onleave")
-                .setStyle(2)),
-            new ActionRowBuilder().addComponents(new ButtonBuilder()
+                .setStyle(2),
+                new ButtonBuilder()
                 .setLabel("Return From Leave")
                 .setCustomId("onleave/back")
-                .setStyle(2))
+                .setStyle(2)
+            )
         ]
-
     })
 }
 exports.modal = async (client, interaction) => {
